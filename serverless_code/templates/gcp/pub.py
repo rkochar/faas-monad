@@ -6,7 +6,7 @@ def publish_message(message, publish=False):
         return message
     print(f"publish_message: {message}")
 
-    topic_path = getenv("TOPIC_ID")
+    topic_path = getenv("TOPIC_ID") if getenv("TOPIC_ID_PUB") is None else getenv("TOPIC_ID_PUB")
     publisher = pubsub_v1.PublisherClient()
 
     if isinstance(message, str):

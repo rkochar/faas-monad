@@ -8,13 +8,5 @@ def confirm_transaction(message):
     if int(old_sender[1]) < amount:
         print(f"Insufficient funds: sender: {sender}, receiver: {receiver}, amount: {amount}")
     else:
-        current_sender = (int(old_sender[0]) + 1, int(old_sender[1]) - amount)
-        current_receiver = (int(old_receiver[0]) + 1, int(old_receiver[1]) + amount)
-
-        queries = [
-            f"UPDATE bank_account SET current_version = {current_sender[0]}, amount = {current_sender[1]}, previous_version = {old_sender[0]}, previous_amount = {old_sender[1]} WHERE id = {sender}",
-            f"UPDATE bank_account SET current_version = {current_receiver[0]}, amount = {current_receiver[1]}, previous_version = {old_receiver[0]}, previous_amount = {old_receiver[1]} WHERE id = {receiver}",
-            f"UPDATE bank_account_{sender} SET current_version = {current_sender[0]}, amount = {current_sender[1]}, previous_version = {old_sender[0]}, previous_amount = {old_sender[1]} WHERE id = {sender}",
-            f"UPDATE bank_account_{receiver} SET current_version = {current_receiver[0]}, amount = {current_receiver[1]}, previous_version = {old_receiver[0]}, previous_amount = {old_receiver[1]} WHERE id = {receiver}"
-        ]
-        execute_sql_query(queries)
+        publish_message(str({"body": {"sender": sender, "receiver": receiver, "amount": amount}}), True)
+        print(f"Transaction confirmed: sender: {sender}, receiver: {receiver}, amount: {amount}")

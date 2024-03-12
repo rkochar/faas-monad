@@ -6,16 +6,13 @@ def publish_message(message, publish=False):
         return message
     print(f"publish_message: {message}")
 
-    queue_name, regex = getenv('QUEUE_NAME'), getenv("REGEX")
+    queue_name, regex = getenv('QUEUE_NAME') if getenv('QUEUE_NAME_PUB') is None else getenv('QUEUE_NAME_PUB'), getenv("REGEX")
     queue_url = getenv("SQS_DO_NOT_USE") if regex == "true" else getenv(f"SQS_{queue_name}")
     sqs, output = boto3.client('sqs'), []
 
     output.append(put_message_in_queue(message, sqs, queue_name, queue_url))
 
-    return {
-        'statusCode': 200,
-        'body': str(output)
-    }
+    return str(output)
 
 
 def put_message_in_queue(message, sqs, queue_name, queue_url):
@@ -24,6 +21,9 @@ def put_message_in_queue(message, sqs, queue_name, queue_url):
 
     print(f"Publishing message: {message} to queue: {queue_name}")
     sqs = boto3.client('sqs')
-    response = sqs.send_message(QueueUrl=queue_url, MessageBody=message, MessageGroupId=queue_name, MessageDeduplicationId=dedupid)
+    if queue_name.endswith(".fifo"):
+        response = sqs.send_message(QueueUrl=queue_url, MessageBody=message, MessageGroupId=queue_name, MessageDeduplicationId=dedupid)
+    else:
+        response = sqs.send_message(QueueUrl=queue_url, MessageBody=message)
     output = f'Publish response for message: {message} in group {queue_name} is: {response}'
     return f'Publish response for message: {message} in group {queue_name} is: {response}'

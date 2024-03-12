@@ -35,6 +35,7 @@ class Monad:
         """
         config = Config()
         self.cloud_provider = config.require("cloud_provider")
+        self.NUM_MESSAGE_QUEUES = 0
 
         match self.cloud_provider:
             case "aws":
@@ -148,7 +149,8 @@ class Monad:
         """
         match self.cloud_provider:
             case "aws":
-                if self.aws_config.get("vpc") is not None and self.aws_config.get("vpc_endpoint") is None:
+                self.NUM_MESSAGE_QUEUES += 1
+                if self.aws_config.get("vpc") is not None and self.aws_config.get("vpc_endpoint") is None and self.NUM_MESSAGE_QUEUES <= 1:
                     self.create_vpc_endpoint("sqs", "sqs")
                 return aws_sqs.create_sqs(topic_name, fifo=fifo, visibility_timeout_seconds=message_retention_seconds, opts=opts)
             case "gcp":
