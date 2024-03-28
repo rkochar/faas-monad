@@ -3,6 +3,7 @@ from os import getenv
 from time import time
 from uuid import uuid4
 from ast import literal_eval
+from base64 import b64decode
 
 
 @functions_framework.cloud_event
@@ -12,7 +13,7 @@ def template(cloud_event):
     <start-span>
     print("starting")
 
-    message = literal_eval(base64.b64decode(cloud_event.data["message"]["data"]).decode("utf-8"))
+    message = literal_eval(b64decode(cloud_event.data["message"]["data"]).decode("utf-8"))
     print(f"Message from queue: {message}")
     parent_span = message.get('span') or {}
 

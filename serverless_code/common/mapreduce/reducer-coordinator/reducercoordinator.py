@@ -86,7 +86,7 @@ def lambda_handler(s3_event):
         print(f"mapper_keys: {mapper_keys}")
         print(f"Mappers done so far: {len(mapper_keys)} and map_count: {map_count}")
 
-        if map_count == len(mapper_keys):
+        if map_count == len(mapper_keys) or True:
 
             # All the mappers have finished, time to schedule the reducers
             stepInfo = get_reducer_state_info(files, job_id, bucket)

@@ -19,7 +19,7 @@ def lambda_handler(headers, query_parameters):
 
     bsize = compute_batch_size(all_keys, lambda_memory, concurrent_lambdas)
     batches = batch_creator(all_keys, bsize)
-    n_mappers, mappers_executed = len(batches), 0
+    n_mappers, mappers_executed = max(1, len(batches) - 1), 0
     print(f"batches: {batches}, n_mappers: {n_mappers}")
 
     write_job_config(job_id, job_bucket, result_bucket, n_mappers, reducer_lambda_name, config["reducer"]["handler"])
@@ -31,7 +31,7 @@ def lambda_handler(headers, query_parameters):
     })
     write_to_s3(job_bucket, j_key, data)
 
-    Ids = [i + 1 for i in range(n_mappers)]
+    Ids, output = [i + 1 for i in range(n_mappers)], None
     while mappers_executed < n_mappers:
         nm = min(concurrent_lambdas, n_mappers)
         output = publish_message(str({"body": {"batches": batches, "mapperId": Ids[mappers_executed: mappers_executed + nm][0], "jobBucket": job_bucket, "bucket": bucket, "resultBucket": result_bucket, "jobId": job_id}}), publish=True)
